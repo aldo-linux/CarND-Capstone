@@ -216,9 +216,14 @@ class WaypointUpdater(object):
     def pose_cb(self, msg):
         self.pose = msg
 
+    # Waypoints callback
     def waypoints_cb(self, waypoints):
         # TODO: Implement
-        self.base_waypoints = waypoints
+        # Set the base waypoints once because it never change after that
+        self.base_lane = waypoints
+
+        # Take first LOOKAHEAD_WPS (i.e. 200) points of way points ahead of car
+        # Prevent race condition: make sure the self.waypoints_2d is initalized before subscriber
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
