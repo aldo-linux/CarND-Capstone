@@ -50,17 +50,8 @@ class WaypointUpdater(object):
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         self.loop()
-"""
+
     def loop(self):
-        rate = rospy.Rate(50)
-        while not rospy.is_shutdown():
-            if self.pose and self.base_waypoints:
-                # Get closest waypoint
-                closest_waypoint_idx = self.get_closest_waypoint_idx()
-                self.publish_waypoints(closest_waypoint_idx)
-            rate.sleep()
-"""
-     def loop(self):
         # Set the target publish rate to 50Hz
         rate = rospy.Rate(PUBLISHING_RATE)
         while not rospy.is_shutdown():
