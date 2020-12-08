@@ -57,6 +57,12 @@ class TLDetector(object):
 
     def waypoints_cb(self, waypoints):
         self.waypoints = waypoints
+        # Create KDTree for fast 2D waypoint lookup. Log(N) efficient
+        # Take first LOOKAHEAD_WPS (i.e. 200) points of way points ahead of car
+        # Prevent race condition: make sure the self.waypoints_2d is initalized before subscriber
+        if not self.waypoints_2d:
+            self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
+            self.waypoint_tree = KDTree(self.waypoints_2d)
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
