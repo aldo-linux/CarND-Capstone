@@ -10,6 +10,7 @@ from light_classification.tl_classifier import TLClassifier
 import tf
 import cv2
 import yaml
+from scipy.spatial import KDTree
 
 STATE_COUNT_THRESHOLD = 3
 
@@ -146,7 +147,7 @@ class TLDetector(object):
         which is a stop_line for that traffic light
         '''
         closest_light = None
-        light         = None
+        light = None
 
         # Get list of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
