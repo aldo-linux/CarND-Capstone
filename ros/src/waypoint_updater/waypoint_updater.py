@@ -28,7 +28,6 @@ LOOKAHEAD_WPS = 50 # Number of waypoints we will publish. You can change this nu
 STOP_LINE_BUFFER = 2
 MAX_DECEL = 0.5
 PUBLISHING_RATE = 50
-
 class WaypointUpdater(object):
     def __init__(self):
         rospy.init_node('waypoint_updater')
@@ -52,12 +51,13 @@ class WaypointUpdater(object):
         self.loop()
 
     def loop(self):
-        # Set the target publish rate to 50Hz
         rate = rospy.Rate(PUBLISHING_RATE)
         while not rospy.is_shutdown():
-            if self.pose and self.base_lane:
-                self.publish_waypoints()
-            rate.sleep()           
+            if self.pose and self.base_waypoints:
+                # Get closest waypoint
+                closest_waypoint_idx = self.get_closest_waypoint_idx()
+                self.publish_waypoints(closest_waypoint_idx)
+            rate.sleep()
 
     def get_closest_waypoint_idx(self):
         x = self.pose.pose.position.x
@@ -89,8 +89,10 @@ class WaypointUpdater(object):
         return closest_idx
 
     def publish_waypoints(self, closest_idx):
-        final_lane = self.generate_lane()
-        self.final_waypoints_pub.publish(final_lane)
+       lane = Lane()
+        lane.header = self.base_waypoints.header
+        lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
+        self.final_waypoints_pub.publish(lane)
 
     def generate_lane(self):
         '''
