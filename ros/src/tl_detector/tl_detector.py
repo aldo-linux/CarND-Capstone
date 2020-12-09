@@ -89,16 +89,16 @@ class TLDetector(object):
         used.
         '''
         if self.state != state:
-           self.state_count = 0
+            self.state_count = 0
             self.state = state
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
             self.upcoming_red_light_pub.publish(Int32(light_wp))
-       else:
+        else:
            self.upcoming_red_light_pub.publish(Int32(self.last_wp))
-       self.state_count += 1
+        self.state_count += 1
 
     def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
@@ -160,7 +160,7 @@ class TLDetector(object):
         light = None
 
         # Get list of positions that correspond to the line to stop in front of for a given intersection
-       stop_line_positions = self.config['stop_line_positions']
+        stop_line_positions = self.config['stop_line_positions']
         if(self.pose):
             '''
             Get index of the closest car waypoint using KDTree
