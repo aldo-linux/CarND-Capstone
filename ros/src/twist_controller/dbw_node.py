@@ -47,13 +47,14 @@ class DBWNode(object):
         max_steer_angle = rospy.get_param('~max_steer_angle', 8.)
 
         self.steer_pub = rospy.Publisher('/vehicle/steering_cmd',
-                                         SteeringCmd, queue_size=1)
+                                        SteeringCmd, queue_size=1)
         self.throttle_pub = rospy.Publisher('/vehicle/throttle_cmd',
-                                            ThrottleCmd, queue_size=1)
+                                        ThrottleCmd, queue_size=1)
         self.brake_pub = rospy.Publisher('/vehicle/brake_cmd',
-                                         BrakeCmd, queue_size=1)
+                                        BrakeCmd, queue_size=1)
 
         # TODO: Create `Controller` object
+        # self.controller = Controller(<Arguments you wish to provide>)
         self.controller = Controller(vehicle_mass=vehicle_mass,
                                      fuel_capacity=fuel_capacity,
                                      brake_deadband=brake_deadband,
@@ -77,7 +78,7 @@ class DBWNode(object):
         self.linear_vel   = None
         self.angular_vel  = None
         self.throttle     = self.steering = self.brake = 0
-
+        
         self.loop()
 
     def loop(self):
@@ -102,7 +103,7 @@ class DBWNode(object):
                 # Avoid accumulating errors from the integral term
                 # when DBW is off, (0,0,0) reset PID controller
                 self.publish(self.throttle, self.brake, self.steering)
-          
+                
             rate.sleep()
 
     def dbw_enabled_cb(self, msg):

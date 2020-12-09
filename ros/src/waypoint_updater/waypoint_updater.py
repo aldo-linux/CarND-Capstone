@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import numpy as np
+
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
@@ -7,6 +7,7 @@ from scipy.spatial import KDTree
 
 from std_msgs.msg import Int32
 
+import numpy as np
 import math
 
 '''
@@ -25,21 +26,21 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 50 # Number of waypoints we will publish. You can change this number
-STOP_LINE_BUFFER = 2
+STOP_LINE_BUFFER = 3
 MAX_DECEL = 0.5
 PUBLISHING_RATE = 50
+
 class WaypointUpdater(object):
     def __init__(self):
         rospy.init_node('waypoint_updater')
-
+        
         # TODO: Add other member variables you need below
         self.base_lane = None
         self.pose = None
-        self.base_waypoints = None
         self.stopline_wp_idx = -1
         self.waypoints_2d = None
         self.waypoint_tree = None
-
+        
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
         rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
@@ -53,10 +54,8 @@ class WaypointUpdater(object):
     def loop(self):
         rate = rospy.Rate(PUBLISHING_RATE)
         while not rospy.is_shutdown():
-            if self.pose and self.base_waypoints:
-                # Get closest waypoint
-                closest_waypoint_idx = self.get_closest_waypoint_idx()
-                self.publish_waypoints(closest_waypoint_idx)
+            if self.pose and self.base_lane:
+                self.publish_waypoints()
             rate.sleep()
 
     def get_closest_waypoint_idx(self):
@@ -88,11 +87,9 @@ class WaypointUpdater(object):
 
         return closest_idx
 
-    def publish_waypoints(self, closest_idx):
-        lane = Lane()
-        lane.header = self.base_waypoints.header
-        lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
-        self.final_waypoints_pub.publish(lane)
+    def publish_waypoints(self):
+        final_lane = self.generate_lane()
+        self.final_waypoints_pub.publish(final_lane)
 
     def generate_lane(self):
         '''
@@ -151,7 +148,7 @@ class WaypointUpdater(object):
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
             
         return lane
-
+        
     def decelerate_waypoints(self, waypoints, closest_idx):
         temp = []
         for i,wp in enumerate(waypoints):
@@ -215,7 +212,7 @@ class WaypointUpdater(object):
             temp.append(p)
             
         return temp
-
+    
     def pose_cb(self, msg):
         self.pose = msg
 
